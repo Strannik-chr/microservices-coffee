@@ -2,7 +2,7 @@ package main
 
 import (
     "net/http"
-
+    "os"
     "github.com/gin-gonic/gin"
     "gorm.io/driver/postgres"
     "gorm.io/gorm"
@@ -26,7 +26,11 @@ type CreateDrinkRequest struct {
 var db *gorm.DB
 
 func main() {
-    dsn := "host=localhost user=postgres password=364001 dbname=menu_db port=5432 sslmode=disable"
+    dsn := os.Getenv("DATABASE_URL")
+    if dsn == "" {
+        dsn = "host=localhost user=postgres password=364001 dbname=menu_db port=5432 sslmode=disable"
+    }
+
     var err error
     db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
     if err != nil {
@@ -41,7 +45,12 @@ func main() {
     router.GET("/drinks/:id", getDrink)
     router.POST("/drinks", createDrink)
 
-    router.Run(":8081")
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = "8081"
+    }
+
+    router.Run(":" + port)
 }
 
 // GET /drinks — список всех напитков
